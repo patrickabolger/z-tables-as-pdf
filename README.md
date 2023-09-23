@@ -1,0 +1,1 @@
+This is a quarto document that allows you to create a pdf version of a z-table for statistics exams, etc.

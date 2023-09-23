@@ -1,0 +1,67 @@
+---
+format: pdf
+editor: source
+execute:
+  echo: false
+  warning: false
+  error: false
+
+---
+
+```{r}
+#| include: false
+
+# install the packagesNeeded below if they are absent from your system
+
+packagesNeeded <- c("readr", "dplyr", "flextable")
+
+invisible(lapply(packagesNeeded, library, character.only = TRUE))
+
+```
+
+```{r}
+
+# raw file shows area to the left of specific z-scores
+ztable_leftward <- round(read_csv("ztable.csv", col_types = cols()),4)
+# remove lines that are all zeros
+ztable_leftward_filtered <- ztable_leftward |> 
+  filter(if_all(starts_with("0"), ~ . > 0)) |>
+  filter(if_all(starts_with("0"), ~ . < 1)) 
+ztable_rightward_filtered <- ztable_leftward_filtered |> mutate(across(`0`:`0.09`, ~ 1-.x))
+
+ztable_leftward_filtered <- ztable_leftward_filtered |> mutate(across(`0`:`0.09`, ~ round(.x,4)))
+ztable_rightward_filtered <- ztable_rightward_filtered |> mutate(across(`0`:`0.09`, ~ round(.x,4)))
+
+```
+
+# *z*-table (rightward)
+**Directions**: To find any particular *z*-score, combine the value in the row in the left-most column (`Z`) with the appropriate value across the top of the rightward columns. For example, the area `to the right` of a *z*-score of `-1.25` would be found by finding the intersection of `-1.2` in the first column with the column labeled `0.05` across the top (This value is 0.8944).
+
+<br/>
+
+```{r}
+set_flextable_defaults(fonts_ignore=TRUE)
+
+qflextable(ztable_rightward_filtered) |>
+  fit_to_width(max_width=7, inc = 1L, max_iter = 20, unit = "in") |>
+  theme_zebra()
+
+```
+
+<br/>
+
+# *z*-table (leftward)
+**Directions**: To find any particular *z*-score, combine the value in the row in the left-most column (`Z`) with the appropriate value across the top of the rightward columns. For example, the area `to the left` of a *z*-score of `-1.25` would be found by finding the intersection of `-1.2` in the first column with the column labeled `0.05` across the top (this value is 0.1056).
+
+<br/>
+
+```{r}
+
+set_flextable_defaults(fonts_ignore=TRUE)
+
+qflextable(ztable_leftward_filtered) |>
+  fit_to_width(max_width=7, inc = 1L, max_iter = 20, unit = "in") |>
+  theme_zebra()
+
+```
+
